@@ -20,8 +20,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -55,6 +57,13 @@ class SmartTabStrip extends LinearLayout {
   private static final boolean DEFAULT_INDICATOR_WITHOUT_PADDING = false;
   private static final int DEFAULT_INDICATOR_GRAVITY = GRAVITY_BOTTOM;
   private static final boolean DEFAULT_DRAW_DECORATION_AFTER_TAB = false;
+  private static final boolean DEFAULT_INDICATOR_GRADIENT = false;
+  private static final int DEFAULT_INDICATOR_START_COLOR = Color.parseColor("#e95a7d");
+  private static final int DEFAULT_INDICATOR_END_COLOR = Color.parseColor("#fdad9f");
+  private static final int DEFAULT_INDICATOR_MARGIN_BOTTOM = 0;
+  private static final int DEFAULT_INDICATOR_MARGIN_LEFT = 0;
+  private static final int DEFAULT_INDICATOR_MARGIN_RIGHT = 0;
+
 
   private final int topBorderThickness;
   private final int topBorderColor;
@@ -75,6 +84,13 @@ class SmartTabStrip extends LinearLayout {
   private final float dividerHeight;
   private final SimpleTabColorizer defaultTabColorizer;
   private final boolean drawDecorationAfterTab;
+  private final boolean indicatorGradient;
+  private final int indicatorStartColor;
+  private final int indicatorEndColor;
+  private final int indicatorMarginBottom;
+  private final int indicatorMarginLeft;
+  private final int indicatorMarginRight;
+
 
   private int lastPosition;
   private int selectedPosition;
@@ -110,6 +126,12 @@ class SmartTabStrip extends LinearLayout {
     int dividerColorsId = NO_ID;
     int dividerThickness = (int) (DEFAULT_DIVIDER_THICKNESS_DIPS * density);
     boolean drawDecorationAfterTab = DEFAULT_DRAW_DECORATION_AFTER_TAB;
+    boolean indicatorGradient = DEFAULT_INDICATOR_GRADIENT;
+    int indicatorStartColor = DEFAULT_INDICATOR_START_COLOR;
+    int indicatorEndColor = DEFAULT_INDICATOR_END_COLOR;
+    int indicatorMarginBottom = DEFAULT_INDICATOR_MARGIN_BOTTOM;
+    int indicatorMarginLeft = DEFAULT_INDICATOR_MARGIN_LEFT;
+    int indicatorMarginRight = DEFAULT_INDICATOR_MARGIN_RIGHT;
 
     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.stl_SmartTabLayout);
     indicatorAlwaysInCenter = a.getBoolean(
@@ -148,6 +170,14 @@ class SmartTabStrip extends LinearLayout {
         R.styleable.stl_SmartTabLayout_stl_dividerThickness, dividerThickness);
     drawDecorationAfterTab = a.getBoolean(
         R.styleable.stl_SmartTabLayout_stl_drawDecorationAfterTab, drawDecorationAfterTab);
+
+    indicatorGradient = a.getBoolean(R.styleable.stl_SmartTabLayout_stl_indicatorGradient, indicatorGradient);
+    indicatorStartColor = a.getColor(R.styleable.stl_SmartTabLayout_stl_indicatorGradientStartColor, indicatorStartColor);
+    indicatorEndColor = a.getColor(R.styleable.stl_SmartTabLayout_stl_indicatorGradientEndColor , indicatorEndColor);
+    indicatorMarginBottom = a.getDimensionPixelSize(R.styleable.stl_SmartTabLayout_stl_indicatorMarginBottom, indicatorMarginBottom);
+    indicatorMarginLeft = a.getDimensionPixelSize(R.styleable.stl_SmartTabLayout_stl_indicatorMarginLeft, indicatorMarginLeft);
+    indicatorMarginRight = a.getDimensionPixelSize(R.styleable.stl_SmartTabLayout_stl_indicatorMarginRight, indicatorMarginRight);
+
     a.recycle();
 
     final int[] indicatorColors = (indicatorColorsId == NO_ID)
@@ -183,6 +213,12 @@ class SmartTabStrip extends LinearLayout {
     this.dividerThickness = dividerThickness;
 
     this.drawDecorationAfterTab = drawDecorationAfterTab;
+    this.indicatorGradient = indicatorGradient;
+    this.indicatorStartColor = indicatorStartColor;
+    this.indicatorEndColor = indicatorEndColor;
+    this.indicatorMarginBottom = indicatorMarginBottom;
+    this.indicatorMarginLeft = indicatorMarginLeft;
+    this.indicatorMarginRight = indicatorMarginRight;
 
     this.indicationInterpolator = SmartTabIndicationInterpolator.of(indicationInterpolatorId);
   }
@@ -383,7 +419,18 @@ class SmartTabStrip extends LinearLayout {
         bottom = center + (thickness / 2f);
     }
 
-    indicatorPaint.setColor(color);
+    top -= indicatorMarginBottom;
+    bottom -= indicatorMarginBottom;
+    left += indicatorMarginLeft;
+    right -= indicatorMarginRight;
+
+    if (indicatorGradient) {
+      indicatorPaint.setShader(new LinearGradient(left, center, right, center,
+              indicatorStartColor, indicatorEndColor, Shader.TileMode.CLAMP));
+    } else {
+      indicatorPaint.setColor(color);
+    }
+
     if (indicatorWidth == AUTO_WIDTH) {
       indicatorRectF.set(left, top, right, bottom);
     } else {

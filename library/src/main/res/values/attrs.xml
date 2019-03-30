@@ -41,5 +41,13 @@
       <enum name="auto_center" value="-1"/>
     </attr>
     <attr name="stl_drawDecorationAfterTab" format="boolean"/>
+
+    <attr name="stl_indicatorGradient" format="boolean" />
+    <attr name="stl_indicatorGradientStartColor" format="color" />
+    <attr name="stl_indicatorGradientEndColor" format="color" />
+    <attr name="stl_indicatorMarginBottom" format="dimension" />
+    <attr name="stl_indicatorMarginLeft" format="dimension" />
+    <attr name="stl_indicatorMarginRight" format="dimension" />
+
   </declare-styleable>
 </resources>
